@@ -1,88 +1,98 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { ChangeEvent } from 'react';
 
-const TakeImages: React.FC = () => {
-  const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+export default function TakeImages(){
+  const [selectedFile,setSelectedFile] = useState<File | null>(null);
+  const [url,setUrl] = useState<string | null>(null);
+
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-
-    if (file) {
-      setSelectedImage(file);
-      const objectUrl = URL.createObjectURL(file);
-      setPreviewUrl(objectUrl);
-      
-      // Ideally, use a useEffect to revoke object URLs to avoid memory leaks
-      // inside a real application lifecycle
+  useEffect(()=> {
+    if(url) {
+      //this return is necessary bc this makes run the function before url changes
+      return () => {
+        URL.revokeObjectURL(url);
+      }
     }
-  };
+  }, [url]);
 
+
+  function handleFileChange(event : ChangeEvent<HTMLInputElement>){
+    const file : File | undefined = event.target.files?.[0];
+
+    if(file){
+      setSelectedFile(file);
+      setUrl(URL.createObjectURL(file));
+    }
+  }
   return (
-    <div className="p-6 max-w-md mx-auto bg-white rounded-xl shadow-md space-y-4 border border-gray-100">
-      <h2 className="text-xl font-bold text-gray-800">Upload or Take Photo</h2>
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gradient-to-br from-amber-50 to-orange-100 p-6">
+      <img className="w-64" src="/images/scratch-logo-splash-screen.png" alt="" />
+      <div className="max-w-2xl mx-auto">
+        <h1 className="text-4xl font-bold text-center text-amber-900 mb-8">Upload or take a Photo</h1>
+        
+        <div className='w-full flex flex-col gap-3 mb-8'>
+          <button 
+            onClick={() => fileInputRef.current?.click()} 
+            className="w-full py-4 px-6 text-lg font-semibold bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
+          >
+            📁 Upload image
+          </button>
+          <button 
+            onClick={() => cameraInputRef.current?.click()} 
+            className="w-full py-4 px-6 text-lg font-semibold bg-gradient-to-r from-orange-500 to-amber-600 hover:from-orange-600 hover:to-amber-700 text-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
+          >
+            📷 Open the camera
+          </button>
+        </div>
 
-      <div className="flex flex-col sm:flex-row gap-3">
-        {/* Button 1: Upload from Gallery */}
-        <button 
-          onClick={() => fileInputRef.current?.click()}
-          className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-        >
-          📁 Upload Image
-        </button>
+        <input 
+          type="file"
+          accept="image/*"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          className="hidden"
+        />
+        <input 
+          type="file"
+          accept="image/*"
+          ref={cameraInputRef}
+          capture="environment"
+          onChange={handleFileChange}
+          className="hidden"
+        />
 
-        {/* Button 2: Take Photo with Camera */}
-        <button 
-          onClick={() => cameraInputRef.current?.click()}
-          className="flex-1 px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-medium rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-1"
-        >
-          📸 Open Camera
-        </button>
+        {
+          url && (
+              <div className="bg-amber-50 rounded-lg shadow-lg p-6 overflow-hidden border-2 border-amber-200">
+                <h2 className="text-2xl font-bold text-amber-900 mb-4">Preview</h2>
+                <div className="bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg flex items-center justify-center mb-4 overflow-hidden max-h-96">
+                  <img src={url} alt="preview" className="w-full h-full object-contain" />
+                </div>
+                
+                {
+                  selectedFile && (
+                    <div className="bg-gradient-to-r from-amber-100 to-orange-100 p-3 rounded-md border border-amber-300">
+                      <p className="text-sm text-amber-900">
+                        <span className="font-semibold">Archivo:</span> {selectedFile.name}
+                      </p>
+                      <p className="text-sm text-amber-800 mt-1">
+                        <span className="font-semibold">Tamaño:</span> {(selectedFile.size / 1024).toFixed(2)} KB
+                      </p>
+                    </div>
+                  )
+                }
+
+              </div>
+          )
+        }
+        
+
       </div>
 
-      {/* Hidden Input: Standard File Picker */}
-      <input
-        type="file"
-        accept="image/*"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        className="hidden"
-      />
-
-      {/* Hidden Input: Camera Trigger 
-          'capture="environment"' forces the rear camera on mobile */}
-      <input
-        type="file"
-        accept="image/*"
-        capture="environment"
-        ref={cameraInputRef}
-        onChange={handleFileChange}
-        className="hidden"
-      />
-
-      {/* Preview Section */}
-      {previewUrl && (
-        <div className="mt-4 space-y-2">
-          <p className="text-sm font-semibold text-gray-700">Preview:</p>
-          <div className="relative w-full h-64 bg-gray-50 rounded-lg overflow-hidden border border-gray-200">
-            <img 
-              src={previewUrl} 
-              alt="Preview" 
-              className="w-full h-full object-contain"
-            />
-          </div>
-          {selectedImage && (
-            <p className="text-xs text-gray-500 truncate">
-              File: {selectedImage.name}
-            </p>
-          )}
-        </div>
-      )}
     </div>
-  );
-};
 
-export default TakeImages;
+  )
+}
