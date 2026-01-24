@@ -87,19 +87,18 @@ export default function TakeImages() {
               }
 
               {selectedFile && url && (
-                <div className="flex justify-between items-center w-full py-4 px-6 text-lg font-semibold bg-linear-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5">
+                <Link
+                  to="/processImage"
+                  state={{ image: selectedFile }}
+                  className="flex justify-between items-center w-full py-4 px-6 text-lg font-semibold bg-linear-to-r from-amber-600 to-amber-700 hover:from-amber-700 hover:to-amber-800 text-white rounded-lg shadow-md transition-all duration-200 hover:shadow-lg transform hover:-translate-y-0.5"
+                >
                   Procesar imagen
-                  {/*with the state property you keep the object in the browser, so you can access it in 
-                  differents pages, make sure you revoke all the url objects with URL.revokeObjectURL(url) */}
-
-                  <Link state={{ image: selectedFile }} to="/processImage" className="cursor-pointer h-12 w-12 rounded-full flex justify-center items-center bg-amber-50 text-amber-700">
-
+                  <div className="h-12 w-12 rounded-full flex justify-center items-center bg-amber-50 text-amber-700">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
                     </svg>
-
-                  </Link>
-                </div>
+                  </div>
+                </Link>
               )
 
               }

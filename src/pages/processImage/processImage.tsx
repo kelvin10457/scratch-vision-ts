@@ -17,24 +17,34 @@ export default function ProcessImage() {
 
     useEffect(() => {
         if (!image) {
-            navigate("/takeImages");
-            return;
+            const timer = setTimeout(() => {
+                navigate("/takeImages");
+            }, 3000);
+            return () => clearTimeout(timer);
         }
 
         const url = URL.createObjectURL(image);
         setUrl(url);
 
-
-        //when you return a function on a useEffect it only runs when the component is destroyed
-        //or just before the effect runs again, in this way you prevent of having unnecessary 
+        // Cleanup
         return () => {
             URL.revokeObjectURL(url);
         }
     }, [image]);
+
+    if (!image) {
+        return (
+            <div className="flex flex-col justify-center items-center min-h-screen bg-amber-50">
+                <p className="text-2xl font-bold text-amber-900 mb-4">⚠️ No image selected</p>
+                <p className="text-amber-700">Redirecting to upload page in 3 seconds...</p>
+            </div>
+        )
+    }
+
     return (
         <>
             {url && (
-                <img src={url} alt={image.name} className="w-full h-auto rounded-2xl shadow-2xl" />
+                <img src={url} alt={image.name} className="w-full h-full object-contain p-2" />
             )}
         </>
     )
