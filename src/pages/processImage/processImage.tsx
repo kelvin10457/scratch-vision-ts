@@ -16,6 +16,7 @@ export default function ProcessImage() {
     const state = location.state as LocationState;
     const image = state?.image;
 
+    //this is for cleaning up and creating a url object for the image
     useEffect(() => {
         if (!image) {
             const timer = setTimeout(() => {
@@ -35,6 +36,8 @@ export default function ProcessImage() {
         }
     }, [image]);
 
+
+    //this is for people that try to get at this page without an image uploaded
     if (!image) {
         return (
             <div className="flex flex-col justify-center items-center min-h-screen bg-amber-50">
@@ -44,6 +47,7 @@ export default function ProcessImage() {
         )
     }
 
+    //this should return the canvas with the cat moving.
     return (
         <>
             {url && (
