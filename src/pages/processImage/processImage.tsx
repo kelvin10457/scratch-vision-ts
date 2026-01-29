@@ -5,6 +5,7 @@ import { useLocation, useNavigate } from "react-router-dom"
 type LocationState = {
     image: File;
 }
+
 export default function ProcessImage() {
     const location = useLocation();
     const navigate = useNavigate();
@@ -26,7 +27,9 @@ export default function ProcessImage() {
         const url = URL.createObjectURL(image);
         setUrl(url);
 
-        // Cleanup
+        //This is a critical step. If you don't "revoke" the URL when the component unmounts,
+        // the browser will keep that image in memory until the page is closed,
+        // potentially causing memory leaks.
         return () => {
             URL.revokeObjectURL(url);
         }

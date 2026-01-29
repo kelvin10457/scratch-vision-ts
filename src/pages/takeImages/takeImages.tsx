@@ -12,7 +12,9 @@ export default function TakeImages() {
 
   useEffect(() => {
     if (url) {
-      //this return is necessary bc this makes run the function before url changes
+      //This is a critical step. If you don't "revoke" the URL when the component unmounts,
+      //  the browser will keep that image in memory until the page is closed,
+      //  potentially causing memory leaks.
       return () => {
         URL.revokeObjectURL(url);
       }
