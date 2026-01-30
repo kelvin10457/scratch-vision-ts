@@ -1,6 +1,9 @@
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
 
+//function to convert the file object to image data to work it as a Mat object from cv
+import fileToImageData from "../../utils/services/fileToImageData";
+
 //just for getting autocomplete and safety
 type LocationState = {
     image: File;
@@ -11,7 +14,7 @@ export default function ProcessImage() {
     const navigate = useNavigate();
 
     //the file is actually a image as an File object
-    const [url, setUrl] = useState<string | null>(null);
+    const [imageData, setImageData] = useState<ImageData | null>(null);
 
     const state = location.state as LocationState;
     const image = state?.image;
@@ -25,16 +28,15 @@ export default function ProcessImage() {
             return () => clearTimeout(timer);
         }
 
-        const url = URL.createObjectURL(image);
-        setUrl(url);
+        fileToImageData(image).then(setImageData).catch(console.error);
 
-        //This is a critical step. If you don't "revoke" the URL when the component unmounts,
-        // the browser will keep that image in memory until the page is closed,
-        // potentially causing memory leaks.
-        return () => {
-            URL.revokeObjectURL(url);
-        }
     }, [image]);
+
+    useEffect(() => {
+        if (imageData) {
+            console.log("Image Data processed:", imageData);
+        }
+    }, [imageData]);
 
 
     //this is for people that try to get at this page without an image uploaded
@@ -50,8 +52,8 @@ export default function ProcessImage() {
     //this should return the canvas with the cat moving.
     return (
         <>
-            {url && (
-                <img src={url} alt={image.name} className="w-full h-full object-contain p-2" />
+            {imageData && (
+                <p>there is image data</p>
             )}
         </>
     )
