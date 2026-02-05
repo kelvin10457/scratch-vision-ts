@@ -1,5 +1,5 @@
 
-export default async function fileToImageData(file: File): Promise<ImageData> {
+export async function fileToImageData(file: File): Promise<ImageData> {
 
     return new Promise((resolve, reject) => {
         const img = new Image();
