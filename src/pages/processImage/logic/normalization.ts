@@ -40,17 +40,50 @@ export function loadImage(imageData: ImageData, listOfTransformations: number[],
     results.push(bgr);
 
     listOfTransformations.forEach((transformation) => {
-        let transformed = cv.Mat();
-        cv.cvtColor(source, transformed, transformation);
+        let transformed = new cv.Mat();
+        // Use bgr as source because most OpenCV color codes (like BGR2HSV) expect BGR
+        cv.cvtColor(bgr, transformed, transformation);
         results.push(transformed);
     });
 
     source.delete();
     return results;
 }
+/*
+def brigthness_correction(img_lab):
+    """
+    Normalizes the brightness of an image by setting the L channel to a constant value.
 
+    Parameters:
+    - img_lab (numpy.ndarray): Image in CIELAB color space.
 
-export function brightnessCorrection() {
+    Returns:
+    - numpy.ndarray: The brightness-corrected image.
+    """
+    img_l, img_a, img_b =cv2.split(img_lab)
+    img_l[:,:] = 150
+    img_lab = cv2.merge((img_l, img_a, img_b))
+    return img_lab
+*/
+//everything related with open cv is an any object because is written 
+//in js so there is no types
+export function brightnessCorrection(labImage: any): any {
+    let channels = new cv.MatVector();
+    //this copies the splitted parts of labImage in channels (cv.MatVector object)
+    cv.split(labImage, channels);
 
+    // We only need to modify the L channel (index 0)
+    let l = channels.get(0);
+    l.setTo(new cv.Scalar(150));
+
+    let result = new cv.Mat();
+
+    // Merge requires the vector of channels
+    cv.merge(channels, result);
+
+    channels.delete();
+    l.delete();
+
+    return result;
 }
 

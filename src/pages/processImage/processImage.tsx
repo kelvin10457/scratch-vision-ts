@@ -7,7 +7,7 @@ import { fileToImageData } from "../../services/fileToImageData";
 import { loadOpenCV } from "../../services/cvLoader";
 
 //
-import { loadImage } from "./logic/normalization";
+import { brightnessCorrection, loadImage } from "./logic/normalization";
 
 type LocationState = {
     image: File;
@@ -62,8 +62,19 @@ export default function ProcessImage() {
         if (cvReady && imageData) {
             console.log("CV Ready & Image Loaded -- Starting Processing");
 
+
+            /*
+            img_lab_bc = brigthness_correction(img_lab)
+            img_bgr_bc = cv2.cvtColor(img_lab_bc, cv2.COLOR_Lab2BGR)
+            img_hsv_bc = cv2.cvtColor(img_bgr_bc, cv2.COLOR_BGR2HSV)
+            */
             try {
-                const [bgrImage, labImage, hsvImage] = loadImage(imageData, [cv.COLOR_BGR2Lab, cv.COLOR_BGR2HSV]);
+                let [bgrImage, labImage, hsvImage] = loadImage(imageData, [cv.COLOR_BGR2Lab, cv.COLOR_BGR2HSV]);
+                let labBrightnessCorrected = brightnessCorrection(labImage);
+                let bgrBrightnessCorrected = new cv.Mat();
+                let hsvBrightnessCorrected = new cv.Mat();
+                cv.cvtColor(labBrightnessCorrected, bgrBrightnessCorrected,);
+                cv.cvtColor(labBrightnessCorrected, hsvBrightnessCorrected,);
             } catch (e) {
                 console.error(e);
             }
