@@ -6,8 +6,11 @@ import { fileToImageData } from "../../services/fileToImageData";
 //this ensure opencv is loaded
 import { loadOpenCV } from "../../services/cvLoader";
 
-//
-import { brightnessCorrection, loadImage } from "./logic/normalization";
+//this module is for normalizing the image, correcting brightness
+import { loadImage, brightnessCorrection } from "./logic/normalization";
+
+//this module is mainly for the segmentation of the blocks in image
+import { getForegroundMask, clusterByColor } from "./logic/segmentation";
 
 type LocationState = {
     image: File;
@@ -60,23 +63,46 @@ export default function ProcessImage() {
     // Processing Logic (Runs once everything is ready)
     useEffect(() => {
         if (cvReady && imageData) {
-            console.log("CV Ready & Image Loaded -- Starting Processing");
 
+            //all variables declared as any are something related to opencv (Mat objects mostly)
+            //they're declared as any because it was written in js and ts does not understand that
+            let bgrImage: any, labImage: any, hsvImage: any;
 
-            /*
-            img_lab_bc = brigthness_correction(img_lab)
-            img_bgr_bc = cv2.cvtColor(img_lab_bc, cv2.COLOR_Lab2BGR)
-            img_hsv_bc = cv2.cvtColor(img_bgr_bc, cv2.COLOR_BGR2HSV)
-            */
+            let labBrightnessCorrected: any, bgrBrightnessCorrected: any, hsvBrightnessCorrected: any;
+
+            let foregroundMask: any; //boolean mask but with 255 in true
+
             try {
-                let [bgrImage, labImage, hsvImage] = loadImage(imageData, [cv.COLOR_BGR2Lab, cv.COLOR_BGR2HSV]);
-                let labBrightnessCorrected = brightnessCorrection(labImage);
-                let bgrBrightnessCorrected = new cv.Mat();
-                let hsvBrightnessCorrected = new cv.Mat();
-                cv.cvtColor(labBrightnessCorrected, bgrBrightnessCorrected,);
-                cv.cvtColor(labBrightnessCorrected, hsvBrightnessCorrected,);
+                //preprocessing
+                [bgrImage, labImage, hsvImage] = loadImage(imageData, [cv.COLOR_BGR2Lab, cv.COLOR_BGR2HSV]);
+                labBrightnessCorrected = brightnessCorrection(labImage);
+                bgrBrightnessCorrected = new cv.Mat();
+                hsvBrightnessCorrected = new cv.Mat();
+
+                //cv.cvtColor(source,destination,constant to decide the change)
+                cv.cvtColor(labBrightnessCorrected, bgrBrightnessCorrected, cv.COLOR_Lab2BGR);
+                cv.cvtColor(bgrBrightnessCorrected, hsvBrightnessCorrected, cv.COLOR_BGR2HSV);
+
+                //clustering
+                foregroundMask = getForegroundMask(hsvBrightnessCorrected);
+
+
             } catch (e) {
                 console.error(e);
+            }
+            finally {
+                //clean up beacuse there is no garbage collector and the finally is always runned
+                //even if there is errors
+                if (bgrImage) bgrImage.delete();
+                if (labImage) labImage.delete();
+                if (hsvImage) hsvImage.delete();
+
+                if (labBrightnessCorrected) labBrightnessCorrected.delete();
+                if (bgrBrightnessCorrected) bgrBrightnessCorrected.delete();
+                if (hsvBrightnessCorrected) hsvBrightnessCorrected.delete();
+
+                if (foregroundMask) foregroundMask.delete();
+
             }
         }
     }, [cvReady, imageData]);

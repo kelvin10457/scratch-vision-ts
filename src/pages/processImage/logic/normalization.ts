@@ -81,8 +81,9 @@ export function brightnessCorrection(labImage: any): any {
     // Merge requires the vector of channels
     cv.merge(channels, result);
 
-    channels.delete();
     l.delete();
+    channels.delete();
+
 
     return result;
 }
