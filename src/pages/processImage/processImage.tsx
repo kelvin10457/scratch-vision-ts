@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react"
 import { useLocation, useNavigate } from "react-router-dom"
+
+//this is for converting the file object to a imageData object
 import { fileToImageData } from "../../services/fileToImageData";
+//this ensure opencv is loaded
 import { loadOpenCV } from "../../services/cvLoader";
+
+//
+import { loadImage } from "./logic/normalization";
 
 type LocationState = {
     image: File;
@@ -47,6 +53,7 @@ export default function ProcessImage() {
             }
         };
 
+        //this setup the tools for starting working with the image
         init();
     }, [image, navigate]);
 
@@ -56,9 +63,7 @@ export default function ProcessImage() {
             console.log("CV Ready & Image Loaded -- Starting Processing");
 
             try {
-                // TODO: Your OpenCV processing logic goes here
-                // const mat = cv.matFromImageData(imageData);
-                // ...
+                const [bgrImage, labImage, hsvImage] = loadImage(imageData, [cv.COLOR_BGR2Lab, cv.COLOR_BGR2HSV]);
             } catch (e) {
                 console.error(e);
             }
